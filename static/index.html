@@ -1,0 +1,152 @@
+<!DOCTYPE html>
+<html lang="en"><head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>MailDesk</title>
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>✉️</text></svg>">
+<style>
+:root{--bg:#eef3f6;--card:#fff;--ink:#14263a;--mut:#5d6f80;--line:#d3dde5;--acc:#0e7c86;--acc2:#e9f5f6;--err:#b42318}
+@media(prefers-color-scheme:dark){:root{--bg:#0c1822;--card:#132532;--ink:#e6eef4;--mut:#9ab0c0;--line:#264255;--acc:#3cc0cc;--acc2:#12303a;--err:#ff8a7a}}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font:16px/1.55 "Segoe UI",system-ui,-apple-system,sans-serif;padding:env(safe-area-inset-top) 0 env(safe-area-inset-bottom)}
+main{max-width:880px;margin:0 auto;padding:clamp(16px,4vw,40px)}
+h1{font:700 clamp(1.8rem,5vw,2.8rem)/1.1 Georgia,"Times New Roman",serif;margin:.2em 0 .3em}
+h2{font:600 1.25rem Georgia,serif;margin:0 0 .6em}
+p.sub{color:var(--mut);margin:0 0 1.6em;max-width:60ch}
+.card{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:clamp(16px,3vw,28px);margin-bottom:18px}
+.providers{display:grid;grid-template-columns:repeat(auto-fit,minmax(170px,1fr));gap:12px}
+button{font:inherit;cursor:pointer}
+.prov{display:flex;align-items:center;gap:12px;padding:16px;border:1.5px solid var(--line);border-radius:12px;background:var(--card);color:var(--ink);text-align:left}
+.prov:hover{border-color:var(--acc);background:var(--acc2)}
+.prov b{display:grid;place-items:center;width:38px;height:38px;border-radius:50%;background:var(--acc);color:#fff;font:700 1.1rem Georgia,serif}
+label{display:block;font-weight:600;margin:14px 0 6px}
+input{width:100%;font:inherit;padding:12px;border:1.5px solid var(--line);border-radius:10px;background:var(--bg);color:var(--ink)}
+input:focus,button:focus-visible{outline:3px solid var(--acc);outline-offset:1px}
+.row{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:12px}
+.primary{background:var(--acc);color:#fff;border:0;padding:13px 22px;border-radius:10px;font-weight:600;margin-top:18px}
+.primary:disabled{opacity:.6;cursor:wait}
+.link{background:none;border:0;color:var(--acc);padding:0;text-decoration:underline}
+.modes{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:10px;margin-top:6px}
+.mode{border:1.5px solid var(--line);border-radius:12px;padding:12px;background:var(--card);color:var(--ink);text-align:left}
+.mode small{display:block;color:var(--mut)}
+.mode[aria-pressed=true]{border-color:var(--acc);background:var(--acc2)}
+.err{color:var(--err);margin-top:12px;font-weight:600}
+.hint{color:var(--mut);font-size:.9rem}
+.stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(130px,1fr));gap:10px;margin-top:10px}
+.stat{border:1px solid var(--line);border-radius:10px;padding:12px}
+.stat span{display:block;color:var(--mut);font-size:.9rem;text-transform:capitalize}
+.stat strong{font:700 1.7rem Georgia,serif}
+.stat.total{background:var(--acc2);border-color:var(--acc)}
+.tablewrap{overflow-x:auto}
+table{border-collapse:collapse;width:100%;min-width:520px}
+th,td{text-align:left;padding:9px 10px;border-bottom:1px solid var(--line);vertical-align:top;overflow-wrap:anywhere}
+.mail{border:1px solid var(--line);border-radius:10px;margin-top:10px;background:var(--card)}
+.mail summary{cursor:pointer;padding:12px;font-weight:600}
+.mail summary small{display:block;font-weight:400;color:var(--mut)}
+.mail pre{margin:0;padding:12px;white-space:pre-wrap;overflow-wrap:anywhere;font:inherit;border-top:1px solid var(--line)}
+.hidden{display:none}
+.bar{display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap}
+</style></head>
+<body><main>
+<h1>MailDesk</h1>
+<p class="sub">Count, list and read the mail you received on any date or date range. Pick your mail provider and sign in with an app password to begin.</p>
+
+<section id="s1" class="card">
+  <h2>Choose your mail provider</h2>
+  <div class="providers">
+    <button class="prov" data-p="gmail"><b>G</b>Gmail</button>
+    <button class="prov" data-p="yahoo"><b>Y</b>Yahoo</button>
+    <button class="prov" data-p="icloud"><b>i</b>iCloud</button>
+  </div>
+</section>
+
+<section id="s2" class="card hidden">
+  <div class="bar"><h2 id="ptitle">Sign in</h2><button class="link" id="back1">Change provider</button></div>
+  <label for="em">Email address</label>
+  <input id="em" type="email" autocomplete="username" inputmode="email">
+  <label for="pw">App password</label>
+  <input id="pw" type="password" autocomplete="off" placeholder="16-character app password">
+  <button class="primary" id="login">Sign in</button>
+  <div class="err" id="e2" role="alert"></div>
+  <p class="hint" id="help"></p>
+  <p class="hint">Your details are sent only to this site's server to talk to your mail provider. They are never saved or logged.</p>
+</section>
+
+<section id="s3" class="hidden">
+  <div class="card">
+    <div class="bar"><h2 id="who">Choose what to fetch</h2><button class="link" id="out">Sign out</button></div>
+    <div class="modes" id="modes">
+      <button class="mode" data-m="count" aria-pressed="true">Count mails<small>Total received in the period</small></button>
+      <button class="mode" data-m="list" aria-pressed="false">Senders and subjects<small>Count with sender and subject</small></button>
+      <button class="mode" data-m="read" aria-pressed="false">Read mails<small>Open each mail in full</small></button>
+    </div>
+    <div class="row">
+      <div><label for="d1">From date</label><input id="d1" type="date"></div>
+      <div><label for="d2">To date (optional)</label><input id="d2" type="date"></div>
+    </div>
+    <p class="hint">Leave "To date" empty to fetch a single day.</p>
+    <button class="primary" id="go">Fetch mails</button>
+    <div class="err" id="e3" role="alert"></div>
+  </div>
+  <div class="card hidden" id="res"></div>
+</section>
+</main>
+<script src="config.js"></script>
+<script>
+const $=id=>document.getElementById(id),S={p:"",em:"",pw:"",m:"count"};
+const helps={gmail:"Gmail: turn on 2-Step Verification, then create an app password under Google Account > Security > 2-Step Verification > App passwords.",yahoo:"Yahoo: open Account Security and choose Generate app password.",icloud:"iCloud: at appleid.apple.com open Sign-In and Security > App-Specific Passwords and create one."};
+const names={gmail:"Gmail",yahoo:"Yahoo",icloud:"iCloud"};
+const show=n=>["s1","s2","s3"].forEach((s,i)=>$(s).classList.toggle("hidden",i+1!==n));
+async function api(path,extra){
+  const r=await fetch((window.API_BASE||"")+"/api/"+path,{method:"POST",headers:{"Content-Type":"application/json"},
+    body:JSON.stringify({provider:S.p,email:S.em,password:S.pw,...extra})});
+  let j={};try{j=await r.json()}catch(e){}
+  if(!r.ok)throw new Error(j.error||"Something went wrong. Try again.");
+  return j;
+}
+function busy(b,on,t){b.disabled=on;if(t)b.textContent=t}
+document.querySelectorAll(".prov").forEach(b=>b.onclick=()=>{
+  S.p=b.dataset.p;$("ptitle").textContent="Sign in to "+names[S.p];
+  $("em").placeholder="you@"+({gmail:"gmail.com",yahoo:"yahoo.com",icloud:"icloud.com"})[S.p];
+  $("help").textContent="Use an app password, not your normal password. "+helps[S.p];$("e2").textContent="";show(2);$("em").focus();});
+$("back1").onclick=()=>{S.pw="";$("pw").value="";show(1)};
+$("login").onclick=async()=>{
+  S.em=$("em").value.trim();S.pw=$("pw").value;$("e2").textContent="";
+  busy($("login"),true,"Signing in…");
+  try{await api("login");$("who").textContent=S.em;show(3);}
+  catch(e){$("e2").textContent=e.message}
+  busy($("login"),false,"Sign in");
+};
+["em","pw"].forEach(i=>$(i).addEventListener("keydown",e=>{if(e.key==="Enter")$("login").click()}));
+$("out").onclick=()=>{S.em=S.pw="";$("pw").value="";$("res").classList.add("hidden");show(1)};
+document.querySelectorAll(".mode").forEach(b=>b.onclick=()=>{S.m=b.dataset.m;
+  document.querySelectorAll(".mode").forEach(x=>x.setAttribute("aria-pressed",x===b))});
+function el(t,c,txt){const e=document.createElement(t);if(c)e.className=c;if(txt!=null)e.textContent=txt;return e}
+function stat(box,label,n,cls){const s=el("div","stat "+(cls||""));s.append(el("span",0,label),el("strong",0,String(n)));box.append(s)}
+$("go").onclick=async()=>{
+  const start=$("d1").value,end=$("d2").value;$("e3").textContent="";
+  if(!start){$("e3").textContent="Choose a start date.";return}
+  busy($("go"),true,"Fetching…");const res=$("res");
+  try{
+    const d=await api(S.m,{start,end});res.replaceChildren();res.classList.remove("hidden");
+    const period=end&&end!==start?start+" to "+end:start;
+    res.append(el("h2",0,"Mails received: "+period));
+    const box=el("div","stats");stat(box,"Total mails",d.total,"total");
+    if(d.categories)for(const k in d.categories)stat(box,k,d.categories[k]);
+    res.append(box);
+    if(S.m==="list"){
+      const w=el("div","tablewrap"),t=el("table"),h=el("tr");
+      ["Sender","Subject","Date"].forEach(x=>h.append(el("th",0,x)));t.append(h);
+      d.mails.forEach(m=>{const r=el("tr");r.append(el("td",0,m.sender),el("td",0,m.subject),el("td",0,m.date));t.append(r)});
+      w.append(t);res.append(w);
+    }
+    if(S.m==="read")d.mails.forEach(m=>{
+      const x=el("details","mail"),s=el("summary",0,m.subject),sm=el("small",0,m.sender+" · "+m.date);
+      s.append(sm);x.append(s,el("pre",0,m.body));res.append(x)});
+    if(d.mails&&d.shown<d.total)res.append(el("p","hint","Showing the newest "+d.shown+" of "+d.total+" mails. Narrow the dates to see the rest."));
+    if(!d.total)res.append(el("p","hint","No mails were received in this period."));
+    res.scrollIntoView({behavior:"smooth"});
+  }catch(e){$("e3").textContent=e.message}
+  busy($("go"),false,"Fetch mails");
+};
+</script></body></html>
